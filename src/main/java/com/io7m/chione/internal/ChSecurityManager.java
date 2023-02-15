@@ -118,22 +118,15 @@ public final class ChSecurityManager implements ActiveMQSecurityManager2
       this.configuration.users()
         .get(user);
 
-    final var userRoles =
-      userRecord.roles();
+    /*
+     * Are any of the roles held by the user permitted to perform the
+     * given action on the given address?
+     */
 
-    final var access = this.configuration.accessControl();
-    for (final var accessEntry : access.entrySet()) {
-      final var prefix = accessEntry.getKey();
-      if (address.startsWith(prefix)) {
-        final var roleGrants = accessEntry.getValue();
-        for (final var grantEntry : roleGrants.entrySet()) {
-          final var role = grantEntry.getKey();
-          if (userRoles.contains(role)) {
-            if (checkType == grantEntry.getValue()) {
-              return true;
-            }
-          }
-        }
+    final var userRoles = userRecord.roles();
+    for (final var role : userRoles) {
+      if (this.configuration.permits(address, role, checkType)) {
+        return true;
       }
     }
 

@@ -20,7 +20,9 @@ package com.io7m.chione.internal;
 import com.io7m.anethum.common.ParseStatus;
 import com.io7m.chione.ChAddressAnycast;
 import com.io7m.chione.ChAddressMulticast;
+import com.io7m.chione.ChAddressRoleGrants;
 import com.io7m.chione.ChAddressType;
+import com.io7m.chione.ChRoleGrants;
 import com.io7m.chione.ChServerConfiguration;
 import com.io7m.chione.ChUser;
 import com.io7m.chione.internal.jaxb.AccessControl;
@@ -187,24 +189,86 @@ public final class ChConfigurationParser
     );
   }
 
-  private static Map<String, Map<String, CheckType>> processAccessControl(
+  private static final class RoleContext
+  {
+    private final HashMap<String, HashMap<String, HashSet<CheckType>>> data;
+
+    RoleContext()
+    {
+      this.data = new HashMap<>();
+    }
+
+    void grant(
+      final String prefix,
+      final String name,
+      final CheckType type)
+    {
+      HashMap<String, HashSet<CheckType>> rolesForPrefix = this.data.get(prefix);
+      if (rolesForPrefix == null) {
+        rolesForPrefix = new HashMap<>();
+      }
+      this.data.put(prefix, rolesForPrefix);
+
+      HashSet<CheckType> permissionsForRole = rolesForPrefix.get(name);
+      if (permissionsForRole == null) {
+        permissionsForRole = new HashSet<>();
+      }
+      rolesForPrefix.put(name, permissionsForRole);
+      permissionsForRole.add(type);
+    }
+
+    public Map<String, ChAddressRoleGrants> results()
+    {
+      final HashMap<String, ChAddressRoleGrants> results =
+        new HashMap<>();
+
+      for (final var prefixEntry : this.data.entrySet()) {
+        final var prefix =
+          prefixEntry.getKey();
+        final var rolesForPrefix =
+          prefixEntry.getValue();
+
+        final var grantsForRole =
+          new HashMap<String, ChRoleGrants>();
+
+        for (final var rolesEntry : rolesForPrefix.entrySet()) {
+          final var roleName =
+            rolesEntry.getKey();
+          final var rolePermissions =
+            rolesEntry.getValue();
+          final var grants =
+            new ChRoleGrants(roleName, Set.copyOf(rolePermissions));
+
+          grantsForRole.put(roleName, grants);
+        }
+
+        final var addressGrants =
+          new ChAddressRoleGrants(prefix, Map.copyOf(grantsForRole));
+
+        results.put(addressGrants.address(), addressGrants);
+      }
+
+      return Map.copyOf(results);
+    }
+  }
+
+  private static Map<String, ChAddressRoleGrants> processAccessControl(
     final AccessControl accessControl)
   {
-    final var results = new HashMap<String, Map<String, CheckType>>();
+    final var roleContext = new RoleContext();
     for (final var matching : accessControl.getForAddressesStartingWith()) {
       final var prefix = matching.getPrefix();
       final var grants = matching.getGrantPermission();
 
-      final var roleGrants = new HashMap<String, CheckType>();
       for (final var grant : grants) {
-        final var check = checkTypeOf(grant.getType());
+        final var type = checkTypeOf(grant.getType());
         for (final var role : grant.getRoleReference()) {
-          roleGrants.put(role.getName(), check);
+          roleContext.grant(prefix, role.getName(), type);
         }
       }
-      results.put(prefix, roleGrants);
     }
-    return results;
+
+    return roleContext.results();
   }
 
   private static CheckType checkTypeOf(

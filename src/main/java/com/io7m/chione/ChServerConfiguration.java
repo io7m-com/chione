@@ -40,7 +40,7 @@ public record ChServerConfiguration(
   Set<ChAddressType> addresses,
   Set<String> roles,
   Map<String, ChUser> users,
-  Map<String, Map<String, CheckType>> accessControl)
+  Map<String, ChAddressRoleGrants> accessControl)
 {
   /**
    * The server configuration.
@@ -60,5 +60,30 @@ public record ChServerConfiguration(
     Objects.requireNonNull(addresses, "addresses");
     Objects.requireNonNull(roles, "roles");
     Objects.requireNonNull(users, "users");
+  }
+
+  /**
+   * @param address    The address
+   * @param role       The role
+   * @param permission The permission
+   *
+   * @return {@code true} if these grants imply the given permission for the
+   * given role on the given address
+   */
+
+  public boolean permits(
+    final String address,
+    final String role,
+    final CheckType permission)
+  {
+    for (final var entry : this.accessControl.entrySet()) {
+      final var prefix = entry.getKey();
+      if (address.startsWith(prefix)) {
+        if (entry.getValue().permits(role, permission)) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 }
