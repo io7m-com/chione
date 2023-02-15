@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            xmlns:c="urn:com.io7m.chione:configuration:1"
+            targetNamespace="urn:com.io7m.chione:configuration:1">
+
+  <xsd:simpleType name="HexUppercase">
+    <xsd:restriction base="xsd:string">
+      <xsd:pattern value="[0-9A-F]*"/>
+    </xsd:restriction>
+  </xsd:simpleType>
+
+  <xsd:simpleType name="PermissionType">
+    <xsd:restriction base="xsd:string">
+      <xsd:enumeration value="BROWSE"/>
+      <xsd:enumeration value="CONSUME"/>
+      <xsd:enumeration value="CREATE_ADDRESS"/>
+      <xsd:enumeration value="CREATE_DURABLE_QUEUE"/>
+      <xsd:enumeration value="CREATE_NON_DURABLE_QUEUE"/>
+      <xsd:enumeration value="DELETE_ADDRESS"/>
+      <xsd:enumeration value="DELETE_DURABLE_QUEUE"/>
+      <xsd:enumeration value="DELETE_NON_DURABLE_QUEUE"/>
+      <xsd:enumeration value="MANAGE"/>
+      <xsd:enumeration value="SEND"/>
+    </xsd:restriction>
+  </xsd:simpleType>
+
+  <xsd:complexType name="AddressType"
+                   abstract="true">
+    <xsd:attribute name="Name"
+                   type="xsd:string"
+                   use="required">
+      <xsd:annotation>
+        <xsd:documentation>
+          The name of the address.
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+  </xsd:complexType>
+
+  <xsd:complexType name="AddressMulticastType">
+    <xsd:complexContent>
+      <xsd:extension base="c:AddressType"/>
+    </xsd:complexContent>
+  </xsd:complexType>
+
+  <xsd:complexType name="AddressAnycastType">
+    <xsd:complexContent>
+      <xsd:extension base="c:AddressType">
+        <xsd:attribute name="QueueName"
+                       type="xsd:string"
+                       use="required">
+          <xsd:annotation>
+            <xsd:documentation>
+              The name of the queue.
+            </xsd:documentation>
+          </xsd:annotation>
+        </xsd:attribute>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+
+  <xsd:element name="AddressMulticast"
+               type="c:AddressMulticastType"/>
+
+  <xsd:element name="AddressAnycast"
+               type="c:AddressAnycastType"/>
+
+  <xsd:group name="AddressGroup">
+    <xsd:choice>
+      <xsd:element ref="c:AddressMulticast"/>
+      <xsd:element ref="c:AddressAnycast"/>
+    </xsd:choice>
+  </xsd:group>
+
+  <xsd:element name="Addresses">
+    <xsd:complexType>
+      <xsd:sequence minOccurs="0"
+                    maxOccurs="unbounded">
+        <xsd:group ref="c:AddressGroup"/>
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+
+  <xsd:element name="RoleReference">
+    <xsd:complexType>
+      <xsd:attribute name="Name"
+                     type="xsd:string"
+                     use="required"/>
+    </xsd:complexType>
+  </xsd:element>
+
+  <xsd:element name="GrantPermission">
+    <xsd:complexType>
+      <xsd:sequence minOccurs="1"
+                    maxOccurs="unbounded">
+        <xsd:element ref="c:RoleReference"/>
+      </xsd:sequence>
+      <xsd:attribute name="Type"
+                     type="c:PermissionType"
+                     use="required"/>
+    </xsd:complexType>
+  </xsd:element>
+
+  <xsd:element name="ForAddressesStartingWith">
+    <xsd:complexType>
+      <xsd:sequence minOccurs="1"
+                    maxOccurs="unbounded">
+        <xsd:element ref="c:GrantPermission"/>
+      </xsd:sequence>
+
+      <xsd:attribute name="Prefix"
+                     type="xsd:string"
+                     use="required"/>
+    </xsd:complexType>
+  </xsd:element>
+
+  <xsd:element name="AccessControl">
+    <xsd:complexType>
+      <xsd:sequence minOccurs="0"
+                    maxOccurs="unbounded">
+        <xsd:element ref="c:ForAddressesStartingWith"/>
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+
+  <xsd:element name="Roles">
+    <xsd:complexType>
+      <xsd:sequence minOccurs="0"
+                    maxOccurs="unbounded">
+        <xsd:element ref="c:Role"/>
+      </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:unique name="RolesUnique">
+      <xsd:selector xpath="c:Role"/>
+      <xsd:field xpath="@Name"/>
+    </xsd:unique>
+  </xsd:element>
+
+  <xsd:element name="Role">
+    <xsd:complexType>
+      <xsd:attribute name="Name"
+                     type="xsd:string"
+                     use="required"/>
+    </xsd:complexType>
+  </xsd:element>
+
+  <xsd:complexType name="PasswordType"
+                   abstract="true"/>
+
+  <xsd:complexType name="PasswordHashedType">
+    <xsd:attribute name="Algorithm"
+                   type="xsd:string"
+                   use="required"/>
+    <xsd:attribute name="Salt"
+                   type="c:HexUppercase"
+                   use="required"/>
+    <xsd:attribute name="Hash"
+                   type="c:HexUppercase"
+                   use="required"/>
+  </xsd:complexType>
+
+  <xsd:element name="PasswordHashed"
+               type="c:PasswordHashedType"/>
+
+  <xsd:group name="PasswordGroup">
+    <xsd:choice>
+      <xsd:element ref="c:PasswordHashed"/>
+    </xsd:choice>
+  </xsd:group>
+
+  <xsd:element name="UserRoles">
+    <xsd:complexType>
+      <xsd:sequence minOccurs="0"
+                    maxOccurs="unbounded">
+        <xsd:element ref="c:RoleReference"/>
+      </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:unique name="RoleReferencesUnique">
+      <xsd:selector xpath="c:RoleReference"/>
+      <xsd:field xpath="@Name"/>
+    </xsd:unique>
+  </xsd:element>
+
+  <xsd:element name="User">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:group ref="c:PasswordGroup"/>
+        <xsd:element ref="c:UserRoles"/>
+      </xsd:sequence>
+
+      <xsd:attribute name="Name"
+                     type="xsd:string"
+                     use="required"/>
+    </xsd:complexType>
+  </xsd:element>
+
+  <xsd:element name="Users">
+    <xsd:complexType>
+      <xsd:sequence minOccurs="0"
+                    maxOccurs="unbounded">
+        <xsd:element ref="c:User"/>
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+
+  <xsd:element name="Configuration">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element ref="c:Addresses"/>
+        <xsd:element ref="c:Roles"/>
+        <xsd:element ref="c:Users"/>
+        <xsd:element ref="c:AccessControl"/>
+      </xsd:sequence>
+
+      <xsd:attribute name="Name"
+                     type="xsd:string"
+                     use="required">
+        <xsd:annotation>
+          <xsd:documentation>
+            The name of the broker instance.
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+
+      <xsd:attribute name="DataDirectory"
+                     type="xsd:string"
+                     use="required">
+        <xsd:annotation>
+          <xsd:documentation>
+            The path of the data directory.
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+    </xsd:complexType>
+
+    <xsd:key name="RolesKey">
+      <xsd:selector xpath="c:Roles/c:Role"/>
+      <xsd:field xpath="@Name"/>
+    </xsd:key>
+
+    <xsd:keyref name="UserHasValidRoleReference"
+                refer="c:RolesKey">
+      <xsd:selector xpath="c:Users/c:User/c:RoleReferences/c:RoleReference"/>
+      <xsd:field xpath="@Name"/>
+    </xsd:keyref>
+
+    <xsd:keyref name="PermissionHasValidRole"
+                refer="c:RolesKey">
+      <xsd:selector xpath="c:AccessControl/c:AccessControlForAddresses/c:Permission/c:RoleReference"/>
+      <xsd:field xpath="@Name"/>
+    </xsd:keyref>
+  </xsd:element>
+
+</xsd:schema>
