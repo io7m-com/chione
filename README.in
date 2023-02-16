@@ -1,0 +1,5 @@
+
+The `chione` package provides an opinionated build of [Apache Artemis](https://activemq.apache.org/components/artemis/)
+with a configuration system geared towards small self-contained deployments.
+
+If you think you want this package, you probably don't. Use at your own risk!

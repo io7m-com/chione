@@ -13,3 +13,9 @@ chione
 | OpenJDK (Temurin) LTS | Linux | [![Build (OpenJDK (Temurin) LTS, Linux)](https://img.shields.io/github/actions/workflow/status/io7m/chione/main.linux.temurin.lts.yml)](https://github.com/io7m/chione/actions?query=workflow%3Amain.linux.temurin.lts)|
 | OpenJDK (Temurin) Current | Windows | [![Build (OpenJDK (Temurin) Current, Windows)](https://img.shields.io/github/actions/workflow/status/io7m/chione/main.windows.temurin.current.yml)](https://github.com/io7m/chione/actions?query=workflow%3Amain.windows.temurin.current)|
 | OpenJDK (Temurin) LTS | Windows | [![Build (OpenJDK (Temurin) LTS, Windows)](https://img.shields.io/github/actions/workflow/status/io7m/chione/main.windows.temurin.lts.yml)](https://github.com/io7m/chione/actions?query=workflow%3Amain.windows.temurin.lts)|
+
+The `chione` package provides an opinionated build of [Apache Artemis](https://activemq.apache.org/components/artemis/)
+with a configuration system geared towards small self-contained deployments.
+
+If you think you want this package, you probably don't. Use at your own risk!
+
