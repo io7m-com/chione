@@ -21,9 +21,15 @@
   <url>https://www.io7m.com/software/chione</url>
 
   <properties>
+    <!-- Configuration. -->
     <io7m.api.previousVersion>0.0.1</io7m.api.previousVersion>
-    <activemq.version>2.28.0</activemq.version>
+    <io7m.java.targetJavaVersion>21</io7m.java.targetJavaVersion>
+
+    <!-- io7m dependencies. -->
     <com.io7m.anethum.version>0.0.2</com.io7m.anethum.version>
+
+    <!-- Third-party dependencies. -->
+    <activemq.version>2.28.0</activemq.version>
   </properties>
 
   <licenses>
