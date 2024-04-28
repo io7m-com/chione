@@ -40,9 +40,9 @@
   </licenses>
 
   <scm>
-    <url>https://github.com/io7m/chione</url>
-    <connection>scm:git:https://github.com/io7m/chione</connection>
-    <developerConnection>scm:git:https://github.com/io7m/chione</developerConnection>
+    <url>https://www.github.com/io7m-com/chione</url>
+    <connection>scm:git:https://www.github.com/io7m-com/chione</connection>
+    <developerConnection>scm:git:https://www.github.com/io7m-com/chione</developerConnection>
   </scm>
 
   <developers>
@@ -55,7 +55,7 @@
   </developers>
 
   <issueManagement>
-    <url>https://github.com/io7m/chione/issues</url>
+    <url>https://www.github.com/io7m-com/chione/issues</url>
     <system>GitHub Issues</system>
   </issueManagement>
 
@@ -77,7 +77,7 @@
 
   <ciManagement>
     <system>GitHub Actions</system>
-    <url>https://github.com/chione/actions</url>
+    <url>https://www.github.com/io7m-com/chione/actions</url>
   </ciManagement>
 
   <dependencies>
